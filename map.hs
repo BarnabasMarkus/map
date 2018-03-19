@@ -36,10 +36,29 @@ len :: Map a b -> Int
 len (Map xs) = length xs
 
 keys :: Map a b -> [a]
-keys (Map xs) = [k | (k, v) <- xs]
+keys (Map xs) = map fst xs
 
 vals :: Map a b -> [b]
-vals (Map xs) = [v | (k, v) <- xs]
+vals (Map xs) = map snd xs
+
+sort :: Ord a => [a] -> [a]
+sort [] = []
+sort (x:xs) = (sort smallers) ++ [x] ++ (sort greaters)
+  where smallers = filter (< x) xs
+        greaters = filter (>= x) xs
+
+sortByKeys :: Ord a => Map a b -> Map a b
+sortByKeys m@(Map xs) = 
+  let keys = sort $ map fst xs
+  in fromList $ [(k, snd x) | k <- keys, x <- xs, k == fst x]
+
+{--
+TODO: works only with unique values, remove duplicates
+sortByVals :: (Eq a, Ord b) => Map a b -> Map a b
+sortByVals m@(Map xs) = 
+  let vals = sort $ map snd xs
+  in fromList $ [ (fst x, v) | v <- vals, x <- xs, v == snd x]
+--}
 
 pretty :: (Show a, Show b) => Map a b -> IO ()
 pretty (Map xs) = 
@@ -80,6 +99,9 @@ info = ["Simple map implementation in haskell"
        ,"* vals"
        ,"  vals myLittleMap"
        ,""
+       ,"* sortByKeys"
+       ,"  sortByKeys myLittleMap"
+       ,""
        ,"* pretty"
        ,"  pretty myLittleMap"
        ,""
@@ -93,6 +115,3 @@ getInfo :: IO ()
 getInfo = mapM_ putStrLn info
 
 
--- Future functions
--- sortKeys :: ord a => Map a b -> Map a b
--- sortVals :: ord b => Map a b -> Map a b
