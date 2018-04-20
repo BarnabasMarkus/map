@@ -27,11 +27,10 @@ import Data.Semigroup
 data Map k v = Map [(k, v)] deriving (Show, Eq)
 
 
--- Be careful: keys have to stay unique!!!
---instance Functor (Map a) where
---  fmap _ (Map []) = Map []
---  fmap f (Map xs) = Map xs'
---    where xs' = map (\(k, v) -> (k, v)) xs
+instance (Eq a) => Functor (Map a) where
+  fmap _ (Map []) = Map []
+  fmap f (Map xs) = Map xs'
+    where xs' = map (\(k, v) -> (k, f v)) xs
 
 
 instance (Eq a) => Semigroup (Map a b) where
