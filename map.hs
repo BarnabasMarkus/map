@@ -1,7 +1,7 @@
 {- M A P   D A T A   S T R U C T U R E -}
 
 
-module Map 
+module Map
   ( Map (..)
   , find
   , insert
@@ -15,8 +15,6 @@ module Map
   , vals
   , sortByKeys
   , pretty
-  -- , fromFile
-  -- , toFile
   )
   where
 
@@ -24,7 +22,11 @@ module Map
 import Data.Semigroup
 
 
-data Map k v = Map [(k, v)] deriving (Show, Eq)
+data Map k v = Map [(k, v)] deriving Eq
+
+
+instance (Show a, Show b) => Show (Map a b) where
+  show = pretty
 
 
 instance (Eq a) => Functor (Map a) where
@@ -44,12 +46,12 @@ instance (Eq a) => Monoid (Map a b) where
 
 find :: Eq a => a -> Map a b -> Maybe b
 find _ (Map []) = Nothing
-find key (Map ((k, v):xs)) = if key == k 
+find key (Map ((k, v):xs)) = if key == k
                              then Just v
                              else find key (Map xs)
 
 insert :: Eq a => a -> b -> Map a b -> Map a b
-insert key value m@(Map xs) = 
+insert key value m@(Map xs) =
   Map $ (key, value) : xs'
   where xs' = if isElem key m
               then filter (\(k, v) -> k /= key) xs
@@ -86,14 +88,11 @@ sort (x:xs) = (sort smallers) ++ [x] ++ (sort greaters)
         greaters = filter (>= x) xs
 
 sortByKeys :: Ord a => Map a b -> Map a b
-sortByKeys m@(Map xs) = 
+sortByKeys m@(Map xs) =
   let keys = sort $ map fst xs
   in fromList $ [(k, snd x) | k <- keys, x <- xs, k == fst x]
 
-pretty :: (Show a, Show b) => Map a b -> IO ()
-pretty (Map xs) = 
-  mapM_ (putStrLn . (\(k,v) -> show k ++ " : " ++ show v )) xs
-
-fromFile = undefined
-
-toFile = undefined
+pretty :: (Show a, Show b) => Map a b -> String
+pretty (Map []) = ""
+pretty (Map ((k,v):xs)) =
+  mconcat [show k, "\t", show v, "\n", pretty (Map xs)]
